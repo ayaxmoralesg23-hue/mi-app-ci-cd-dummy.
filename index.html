@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 Mi App con CI/CD (archivo único)</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+      margin: 40px;
+      background-color: #f0f8ff;
+    }
+    h1 {
+      color: #ff6b6b;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 8px;
+    }
+    #resultado {
+      margin-top: 18px;
+      font-size: 18px;
+      color: #9c27b0;
+    }
+    #testResults {
+      margin-top: 18px;
+      font-family: monospace;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .pass { color: green; }
+    .fail { color: red; }
+    details { margin-top: 16px; text-align: left; display: inline-block; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 ¡Hola desde CI/CD! (Single-file)</h1>
+
+  <button onclick="saludar()">👋 Saludar</button>
+  <button onclick="runTests()">🧪 Ejecutar pruebas (simuladas)</button>
+
+  <p id="resultado"></p>
+
+  <div id="testResults" aria-live="polite" role="status"></div>
+
+  <!-- Instrucciones y comandos (ocultables) -->
+  <details>
+    <summary>🔧 Instrucciones para usar Jest & Git (referencia)</summary>
+    <p>Si quieres ejecutar pruebas con <code>jest</code> fuera del navegador (en Termux, iSH o tu PC):</p>
+    <pre>
+# Inicializar npm
+npm init -y
+
+# Instalar jest como dev dependency
+npm install jest --save-dev
+
+# Agregar script en package.json:
+"scripts": {
+  "test": "jest"
+}
+
+# Ejecutar pruebas localmente
+npm test
+    </pre>
+    <p>Comandos Git / GitHub (ejemplo):</p>
+    <pre>
+git init
+git add .
+git commit -m "🎉 Agregué mi app con pruebas"
+git branch -M main
+git remote add origin https://github.com/tu-usuario/mi-app-ci-cd-dummy.git
+git push -u origin main
+    </pre>
+    <p><strong>Nota:</strong> Jest no corre dentro del navegador; por eso incluimos un runner simple en esta página para ver las pruebas rápidas.</p>
+  </details>
+
+  <script>
+    // -----------------------
+    // Código de la "app"
+    // -----------------------
+
+    // Muestra un saludo en la página
+    function saludar() {
+      document.getElementById('resultado').textContent = '¡Hola desde CI/CD! 🎉';
+    }
+
+    // Función que queremos testear
+    function sumar(a, b) {
+      return a + b;
+    }
+
+    // -----------------------
+    // Mini-runner de pruebas (para navegador)
+    // -----------------------
+    // Simula una prueba unitaria simple y muestra resultados en #testResults
+    function runTests() {
+      const resultsEl = document.getElementById('testResults');
+      resultsEl.innerHTML = ''; // limpiar
+
+      // Lista de tests: cada test es { name, fn }
+      const tests = [
+        {
+          name: 'Sumar 1 + 2 debe ser 3',
+          fn: () => {
+            const received = sumar(1, 2);
+            const expected = 3;
+            if (received !== expected) {
+              throw new Error(`Esperado ${expected} pero se recibió ${received}`);
+            }
+          }
+        },
+        // Aquí puedes agregar más tests si quieres
+        {
+          name: 'Sumar -1 + 1 debe ser 0',
+          fn: () => {
+            const received = sumar(-1, 1);
+            const expected = 0;
+            if (received !== expected) {
+              throw new Error(`Esperado ${expected} pero se recibió ${received}`);
+            }
+          }
+        }
+      ];
+
+      let passed = 0;
+      let failed = 0;
+
+      tests.forEach((t, i) => {
+        const entry = document.createElement('div');
+        entry.style.marginBottom = '8px';
+        try {
+          t.fn(); // ejecutar test
+          entry.innerHTML = `<strong>${i+1}. ${t.name}</strong> — <span class="pass">✅ Passed</span>`;
+          passed++;
+        } catch (err) {
+          entry.innerHTML = `<strong>${i+1}. ${t.name}</strong> — <span class="fail">❌ Failed</span><br><small>${escapeHtml(err.message)}</small>`;
+          failed++;
+        }
+        resultsEl.appendChild(entry);
+      });
+
+      const summary = document.createElement('div');
+      summary.style.marginTop = '12px';
+      summary.style.fontWeight = '600';
+      summary.innerHTML = `Resumen: <span class="pass">${passed} passed</span>, <span class="fail">${failed} failed</span> (total ${tests.length})`;
+      resultsEl.appendChild(summary);
+    }
+
+    // Pequeña utilidad para evitar inyección en mensajes de error
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Ejecutar las pruebas automáticamente al abrir la página (opcional):
+    // runTests();
+  </script>
+</body>
+</html>
